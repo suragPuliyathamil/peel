@@ -1,8 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "../components/commons/Header.jsx";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function CompanyDetails() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -20,12 +23,20 @@ export default function CompanyDetails() {
       { id: 2, name: "Certificate B", expiry: "2025-06-30" },
     ],
     employees: [
-      { id: 1, name: "Alice", empId: "E001", contact: "1111111111" },
-      { id: 2, name: "Bob", empId: "E002", contact: "2222222222" },
+      { id: 1, name: "Alice", empId: "EMP001", contact: "1111111111" },
+      { id: 2, name: "Bob", empId: "EMP002", contact: "2222222222" },
     ],
   };
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="p-6"
+    >
+    {
     <div className="min-h-screen p-6 bg-offwhite text-black dark:bg-gray-900 dark:text-white">
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
@@ -34,8 +45,12 @@ export default function CompanyDetails() {
         <h2 className="text-2xl font-bold mb-4 text-primaryBlue">
           {companyData.name}
         </h2>
-        <p><span className="font-semibold">Contact:</span> {companyData.contact}</p>
-        <p><span className="font-semibold">Address:</span> {companyData.address}</p>
+        <p>
+          <span className="font-semibold">Contact:</span> {companyData.contact}
+        </p>
+        <p>
+          <span className="font-semibold">Address:</span> {companyData.address}
+        </p>
       </div>
 
       {/* Section 2: Documents Table */}
@@ -56,11 +71,16 @@ export default function CompanyDetails() {
           </thead>
           <tbody>
             {companyData.documents.map((doc) => (
-              <tr key={doc.id} className="border-b border-gray-200 dark:border-gray-700">
+              <tr
+                key={doc.id}
+                className="border-b border-gray-200 dark:border-gray-700"
+              >
                 <td className="p-2">{doc.name}</td>
                 <td className="p-2">{doc.expiry}</td>
                 <td className="p-2">
-                  <button className="text-primaryBlue hover:underline">View</button>
+                  <button className="text-primaryBlue hover:underline">
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
@@ -86,8 +106,16 @@ export default function CompanyDetails() {
           </thead>
           <tbody>
             {companyData.employees.map((emp) => (
-              <tr key={emp.id} className="border-b border-gray-200 dark:border-gray-700">
-                <td className="p-2">{emp.name}</td>
+              <tr
+                key={emp.id}
+                className="border-b border-gray-200 dark:border-gray-700"
+              >
+                <td
+                  className="p-2 text-primaryBlue cursor-pointer hover:underline"
+                  onClick={() => navigate(`/employee/${emp.empId}`)}
+                >
+                  {emp.name}
+                </td>
                 <td className="p-2">{emp.empId}</td>
                 <td className="p-2">{emp.contact}</td>
               </tr>
@@ -95,6 +123,7 @@ export default function CompanyDetails() {
           </tbody>
         </table>
       </div>
-    </div>
+    </div>}
+    </motion.div>
   );
 }
