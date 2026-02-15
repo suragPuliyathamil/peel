@@ -1,6 +1,6 @@
 export async function searchCompanies({
   name = "",
-  pageNumber = 1,
+  pageNumber = 0,
   pageSize = 10,
   sortBy = "id",
   sortDirection = "ASC",
