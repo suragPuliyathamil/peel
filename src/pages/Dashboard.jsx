@@ -1,55 +1,44 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SearchBar from "../components/search/SearchBar";
-import { searchCompanies } from "../services/companyService";
+import { AnimatePresence } from "framer-motion";
+import { searchCompanies } from "../services/CompanyService";
+import AddCompanyModal from "../components/modals/AddCompanyModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-
-  const [search, setSearch] = useState("");
   const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [showAddCompany, setShowAddCompany] = useState(false);
 
   const fetchCompanies = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const data = await searchCompanies({
-        name: search, // empty → all companies
-      });
-
-      setCompanies(data.content || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    const data = await searchCompanies({ name: "" });
+    setCompanies(data.content || []);
   };
 
-  // Initial load → all companies
   useEffect(() => {
     fetchCompanies();
   }, []);
 
   return (
     <>
-      <SearchBar
-        value={search}
-        onChange={setSearch}
-        onSearch={fetchCompanies}
-      />
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-primaryBlue">
+          Companies
+        </h1>
 
-      {loading && <p className="mt-6">Loading...</p>}
-      {error && <p className="mt-6 text-red-500">{error}</p>}
+        <button
+          onClick={() => setShowAddCompany(true)}
+          className="bg-primaryBlue text-white px-4 py-2 rounded"
+        >
+          + Add Company
+        </button>
+      </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mt-6">
+      <div className="grid md:grid-cols-3 gap-6">
         {companies.map((company) => (
           <div
             key={company.id}
             onClick={() => navigate(`/company/${company.id}`)}
-            className="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded shadow hover:shadow-lg transition"
+            className="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded shadow hover:shadow-lg"
           >
             <h2 className="text-xl font-bold text-primaryBlue">
               {company.name}
@@ -60,6 +49,15 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      <AnimatePresence>
+        {showAddCompany && (
+          <AddCompanyModal
+            onClose={() => setShowAddCompany(false)}
+            onSuccess={fetchCompanies}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
