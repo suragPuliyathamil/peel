@@ -66,3 +66,17 @@ export async function createCompany({
   const json = await response.json();
   return json.data;
 }
+
+export async function getCompanyById(id) {
+  const response = await fetch(
+    `http://localhost:8001/api/v1/companies/${id}`,
+    { headers: { accept: "*/*" } }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch company details");
+  }
+
+  const json = await response.json();
+  return json.data;
+}
