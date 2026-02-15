@@ -1,42 +1,65 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/commons/Header.jsx";
-import SearchBar from "../components/search/SearchBar.jsx";
-import DashboardCard from "../components/dashboard/DashboardCard.jsx";
+import SearchBar from "../components/search/SearchBar";
+import { searchCompanies } from "../services/companyService";
 
 export default function Dashboard() {
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+  const [search, setSearch] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const companies = [
-    { id: 1, name: "Company A", revenue: "$1M" },
-    { id: 2, name: "Company B", revenue: "$2M" },
-    { id: 3, name: "Company C", revenue: "$3M" },
-  ];
+  const fetchCompanies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await searchCompanies({
+        name: search, // empty → all companies
+      });
+
+      setCompanies(data.content || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load → all companies
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
   return (
-    <div className="min-h-screen p-6 bg-offwhite text-black dark:bg-gray-900 dark:text-white">
-      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-      <SearchBar />
+    <>
+      <SearchBar
+        value={search}
+        onChange={setSearch}
+        onSearch={fetchCompanies}
+      />
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      {loading && <p className="mt-6">Loading...</p>}
+      {error && <p className="mt-6 text-red-500">{error}</p>}
+
+      <div className="grid md:grid-cols-3 gap-6 mt-6">
         {companies.map((company) => (
           <div
             key={company.id}
             onClick={() => navigate(`/company/${company.id}`)}
-            className="cursor-pointer"
+            className="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded shadow hover:shadow-lg transition"
           >
-            <DashboardCard
-              title={company.name}
-              description={`Revenue: ${company.revenue}`}
-            />
+            <h2 className="text-xl font-bold text-primaryBlue">
+              {company.name}
+            </h2>
+            <p>Industry: {company.industry}</p>
+            <p>Status: {company.status}</p>
+            <p>Employees: {company.employeeCount}</p>
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 }
